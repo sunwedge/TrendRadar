@@ -166,9 +166,10 @@ def send_to_feishu(
             f"发送{log_prefix}第 {i}/{len(batches)} 批次，大小：{content_size} 字节 [{report_type}]"
         )
 
-        # 去除 HTML 标签，转为纯文本
+        # 只去除 <font color='xxx'> 样式标签，保留链接等有效 HTML
         import re
-        clean_content = re.sub(r'<[^>]+>', '', batch_content)
+        # 匹配 <font color='xxx'>...</font>
+        clean_content = re.sub(r"<font color='[^']+'>([^<]*)</font>", r"\1", batch_content)
 
         payload = {
             "msg_type": "text",
