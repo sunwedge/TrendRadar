@@ -166,7 +166,7 @@ def send_to_feishu(
             f"发送{log_prefix}第 {i}/{len(batches)} 批次，大小：{content_size} 字节 [{report_type}]"
         )
 
-        # 飞书 card 消息（使用 markdown 格式以支持富文本标签渲染）
+        # 飞书 card 消息（使用富文本 markdown 格式）
         payload = {
             "msg_type": "card",
             "card": {
@@ -175,11 +175,8 @@ def send_to_feishu(
                 },
                 "elements": [
                     {
-                        "tag": "div",
-                        "text": {
-                            "type": "markdown",
-                            "content": batch_content
-                        }
+                        "tag": "markdown",
+                        "content": batch_content
                     }
                 ]
             }
