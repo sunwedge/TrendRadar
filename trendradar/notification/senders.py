@@ -166,19 +166,14 @@ def send_to_feishu(
             f"发送{log_prefix}第 {i}/{len(batches)} 批次，大小：{content_size} 字节 [{report_type}]"
         )
 
-        # 飞书 card 消息（使用富文本 markdown 格式）
+        # 去除 HTML 标签，转为纯文本
+        import re
+        clean_content = re.sub(r'<[^>]+>', '', batch_content)
+
         payload = {
-            "msg_type": "card",
-            "card": {
-                "config": {
-                    "enable_forward": True
-                },
-                "elements": [
-                    {
-                        "tag": "markdown",
-                        "content": batch_content
-                    }
-                ]
+            "msg_type": "text",
+            "content": {
+                "text": clean_content
             }
         }
 
