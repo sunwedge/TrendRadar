@@ -166,19 +166,11 @@ def send_to_feishu(
             f"发送{log_prefix}第 {i}/{len(batches)} 批次，大小：{content_size} 字节 [{report_type}]"
         )
 
-        # 飞书 card 消息（使用 markdown 格式）
+        # 飞书文本消息
         payload = {
-            "msg_type": "card",
-            "card": {
-                "config": {
-                    "enable_forward": True
-                },
-                "elements": [
-                    {
-                        "tag": "markdown",
-                        "content": batch_content
-                    }
-                ]
+            "msg_type": "text",
+            "content": {
+                "text": batch_content
             }
         }
 

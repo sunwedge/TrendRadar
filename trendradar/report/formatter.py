@@ -55,11 +55,8 @@ def format_title_for_platform(
     keyword = title_data.get("matched_keyword", "") if show_keyword else ""
 
     if platform == "feishu":
-        # 飞书文本消息支持 Markdown 链接格式
-        if link_url:
-            formatted_title = f"[{cleaned_title}]({link_url})"
-        else:
-            formatted_title = cleaned_title
+        # 飞书文本消息不直接支持可点击链接，只显示标题
+        formatted_title = cleaned_title
 
         title_prefix = "🆕 " if title_data.get("is_new") else ""
 
