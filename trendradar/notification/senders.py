@@ -176,7 +176,7 @@ def send_to_feishu(
                 "elements": [
                     {
                         "tag": "markdown",
-                        "content": clean_content
+                        "content": batch_content
                     }
                 ]
             }
