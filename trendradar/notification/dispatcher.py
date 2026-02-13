@@ -37,6 +37,7 @@ from .renderer import (
     render_rss_dingtalk_content,
     render_rss_markdown_content,
 )
+from .formatters import sanitize_feishu_markdown
 
 # 类型检查时导入，运行时不导入（避免循环导入）
 if TYPE_CHECKING:
@@ -835,6 +836,7 @@ class NotificationDispatcher:
                 )
 
                 for batch_idx, batch_content in enumerate(batches):
+                    clean_content = sanitize_feishu_markdown(batch_content)
                     payload = {
                         "msg_type": "interactive",
                         "card": {
@@ -846,7 +848,7 @@ class NotificationDispatcher:
                                 "template": "green",
                             },
                             "elements": [
-                                {"tag": "markdown", "content": batch_content}
+                                {"tag": "markdown", "content": clean_content}
                             ],
                         },
                     }

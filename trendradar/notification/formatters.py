@@ -56,6 +56,54 @@ def strip_markdown(text: str) -> str:
     return text.strip()
 
 
+def sanitize_feishu_markdown(content: str) -> str:
+    """清理飞书 markdown 内容中的 HTML 标记，避免在客户端显示原始标签。"""
+    if not content:
+        return ""
+
+    text = content
+
+    # <font> 标签仅保留文本内容
+    text = re.sub(r"<font[^>]*>(.*?)</font>", r"\1", text, flags=re.IGNORECASE | re.DOTALL)
+
+    # <a href="url">text</a> 转换成 markdown 链接
+    text = re.sub(
+        r"""<a\s+[^>]*href=['"]([^'"]+)['"][^>]*>(.*?)</a>""",
+        r"[\2](\1)",
+        text,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+
+    # 移除其他 HTML 标签
+    text = re.sub(r"<[^>]+>", "", text)
+
+    # 限制连续空行，避免消息过于松散
+    text = re.sub(r"\n{3,}", "\n\n", text)
+
+    return text.strip()
+
+
+def sanitize_feishu_text(content: str) -> str:
+    """将飞书文本消息内容规整为纯文本，去除 HTML 与 Markdown 标记。"""
+    text = sanitize_feishu_markdown(content)
+
+    # 飞书 text 消息中不展示链接 URL，只保留标题文本
+    text = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", r"\1", text)
+
+    # 去除常见 markdown 标记
+    text = re.sub(r"\*\*(.+?)\*\*", r"\1", text)
+    text = re.sub(r"__(.+?)__", r"\1", text)
+    text = re.sub(r"\*(.+?)\*", r"\1", text)
+    text = re.sub(r"_(.+?)_", r"\1", text)
+    text = re.sub(r"`(.+?)`", r"\1", text)
+
+    # 去除多余分隔线
+    text = re.sub(r"^[\-\*]{3,}\s*$", "", text, flags=re.MULTILINE)
+    text = re.sub(r"\n{3,}", "\n\n", text)
+
+    return text.strip()
+
+
 def convert_markdown_to_mrkdwn(content: str) -> str:
     """
     将标准 Markdown 转换为 Slack 的 mrkdwn 格式

@@ -30,7 +30,11 @@ from urllib.parse import urlparse
 import requests
 
 from .batch import add_batch_headers, get_max_batch_header_size
-from .formatters import convert_markdown_to_mrkdwn, strip_markdown
+from .formatters import (
+    convert_markdown_to_mrkdwn,
+    strip_markdown,
+    sanitize_feishu_text,
+)
 
 
 def _render_ai_analysis(ai_analysis: Any, channel: str) -> str:
@@ -161,7 +165,8 @@ def send_to_feishu(
 
     # 逐批发送
     for i, batch_content in enumerate(batches, 1):
-        content_size = len(batch_content.encode("utf-8"))
+        clean_content = sanitize_feishu_text(batch_content)
+        content_size = len(clean_content.encode("utf-8"))
         print(
             f"发送{log_prefix}第 {i}/{len(batches)} 批次，大小：{content_size} 字节 [{report_type}]"
         )
@@ -170,7 +175,7 @@ def send_to_feishu(
         payload = {
             "msg_type": "text",
             "content": {
-                "text": batch_content
+                "text": clean_content
             }
         }
 
