@@ -33,7 +33,7 @@ from .batch import add_batch_headers, get_max_batch_header_size
 from .formatters import (
     convert_markdown_to_mrkdwn,
     strip_markdown,
-    sanitize_feishu_text,
+    sanitize_feishu_markdown,
 )
 
 
@@ -165,17 +165,29 @@ def send_to_feishu(
 
     # 逐批发送
     for i, batch_content in enumerate(batches, 1):
-        clean_content = sanitize_feishu_text(batch_content)
+        clean_content = sanitize_feishu_markdown(batch_content)
         content_size = len(clean_content.encode("utf-8"))
         print(
             f"发送{log_prefix}第 {i}/{len(batches)} 批次，大小：{content_size} 字节 [{report_type}]"
         )
 
-        # 飞书文本消息
+        # 飞书卡片消息（Markdown），支持可点击链接
         payload = {
-            "msg_type": "text",
-            "content": {
-                "text": clean_content
+            "msg_type": "interactive",
+            "card": {
+                "header": {
+                    "title": {
+                        "tag": "plain_text",
+                        "content": f"{report_type} {f'({i}/{len(batches)})' if len(batches) > 1 else ''}",
+                    },
+                    "template": "blue",
+                },
+                "elements": [
+                    {
+                        "tag": "markdown",
+                        "content": clean_content,
+                    }
+                ],
             }
         }
 
