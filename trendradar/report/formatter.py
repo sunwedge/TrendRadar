@@ -55,8 +55,9 @@ def format_title_for_platform(
     keyword = title_data.get("matched_keyword", "") if show_keyword else ""
 
     if platform == "feishu":
+        # 飞书支持 HTML <a> 标签作为链接
         if link_url:
-            formatted_title = f"[{cleaned_title}]({link_url})"
+            formatted_title = f'<a href="{link_url}">{cleaned_title}</a>'
         else:
             formatted_title = cleaned_title
 
@@ -71,7 +72,7 @@ def format_title_for_platform(
 
         if rank_display:
             result += f" {rank_display}"
-        if title_data["time_display"]:
+        if title_data['time_display']:
             result += f" <font color='grey'>- {title_data['time_display']}</font>"
         if title_data["count"] > 1:
             result += f" <font color='green'>({title_data['count']}次)</font>"
