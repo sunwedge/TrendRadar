@@ -166,15 +166,19 @@ def send_to_feishu(
             f"发送{log_prefix}第 {i}/{len(batches)} 批次，大小：{content_size} 字节 [{report_type}]"
         )
 
-        # 只去除 <font color='xxx'> 样式标签，保留链接等有效 HTML
-        import re
-        # 匹配 <font color='xxx'>...</font>
-        clean_content = re.sub(r"<font color='[^']+'>([^<]*)</font>", r"\1", batch_content)
-
+        # 飞书 card 消息（使用 markdown 格式）
         payload = {
-            "msg_type": "text",
-            "content": {
-                "text": clean_content
+            "msg_type": "card",
+            "card": {
+                "config": {
+                    "enable_forward": True
+                },
+                "elements": [
+                    {
+                        "tag": "markdown",
+                        "content": clean_content
+                    }
+                ]
             }
         }
 
