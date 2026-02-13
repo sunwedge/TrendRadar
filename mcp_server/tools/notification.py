@@ -722,15 +722,32 @@ code{{background:#f5f5f5;padding:2px 6px;border-radius:3px}}</style>
 # ==================== 各渠道发送器 ====================
 
 def _send_feishu(webhook_url: str, content: str, title: str) -> Dict:
-    """飞书发送（纯文本消息，与 trendradar send_to_feishu 一致）
+    """飞书发送（富文本消息，支持可点击链接）
 
-    飞书 webhook 使用 msg_type: "text"，所有信息整合到 content.text 中。
+    飞书 webhook 使用 msg_type: "post"，支持富文本和可点击链接。
+    链接使用飞书富文本格式: [{"tag": "a", "text": "显示文字", "href": "链接地址"}]
     """
+    # 将 Markdown 链接转换为飞书富文本格式
+    content = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'{"tag":"a","text":"\1","href":"\2"}', content)
+    
+    # 去除 HTML font 标签（飞书富文本不支持）
+    content = re.sub(r'<font[^>]*>(.+?)</font>', r'\1', content)
+    
     payload = {
-        "msg_type": "text",
+        "msg_type": "post",
         "content": {
-            "text": content,
-        },
+            "post": {
+                "zh_cn": {
+                    "title": title,
+                    "content": [
+                        {
+                            "tag": "text",
+                            "text": content
+                        }
+                    ]
+                }
+            }
+        }
     }
     try:
         resp = requests.post(webhook_url, json=payload, timeout=30)
