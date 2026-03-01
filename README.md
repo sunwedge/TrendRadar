@@ -3769,3 +3769,16 @@ GPL-3.0 License
 [🔝 回到顶部](#trendradar)
 
 </div>
+## TrendRadar Wiki Sync Guide
+
+### 飞书知识库自动同步
+
+1. 配置 GitHub Secrets
+- `FEISHU_ACCESS_TOKEN`: 从飞书开放平台获取访问令牌
+
+2. 触发方式
+- 手动：GitHub Actions -> Workflows -> 运行 `wiki-sync.yml`
+
+3. 本地验证
+- 运行：`FEISHU_ACCESS_TOKEN=xxx bash scripts/test_sync.sh`
+- 查看 API 返回是否成功

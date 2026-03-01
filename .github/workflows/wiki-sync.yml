@@ -1,0 +1,41 @@
+name: Sync to Feishu Wiki
+
+on:
+  workflow_dispatch:
+    inputs:
+      trigger:
+        description: Manually trigger sync
+        required: true
+        default: run
+
+jobs:
+  sync-wiki:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create wiki page via Feishu API
+        env:
+          FEISHU_ACCESS_TOKEN: ${{ secrets.FEISHU_ACCESS_TOKEN }}
+          SPACE_ID: "7612135385660967897"
+        run: |
+          set -euo pipefail
+          if [ -z "${FEISHU_ACCESS_TOKEN:-}" ]; then
+            echo "FEISHU_ACCESS_TOKEN is empty"
+            exit 1
+          fi
+
+          payload='{
+            "title": "Usage Manual",
+            "parent_wiki_token": "",
+            "obj_type": "doc"
+          }'
+
+          # NOTE: endpoint may vary by app scope/type; keep as explicit workflow template.
+          curl -sS -X POST "https://open.feishu.cn/open-apis/wiki/v2/spaces/${SPACE_ID}/nodes" \
+            -H "Authorization: Bearer ${FEISHU_ACCESS_TOKEN}" \
+            -H "Content-Type: application/json; charset=utf-8" \
+            -d "${payload}" | tee feishu_wiki_response.json
+
+          echo "Wiki sync request sent."
