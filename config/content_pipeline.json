@@ -1,0 +1,129 @@
+{
+  "pipeline": {
+    "enabled": true,
+    "name": "内容生产流水线",
+    "version": "1.0.0",
+    "description": "灵感收集 -> 素材整理 -> 大纲生成 -> 内容创作 -> 排版优化 -> 多平台发布",
+    "max_articles_per_run": 5,
+    "default_writing_style": "professional",
+    "default_format_platforms": ["wechat", "zhihu", "xiaohongshu", "toutiao", "blog"],
+    "auto_publish": true,
+    "publish_platforms": ["wechat"],
+    "schedule": {
+      "enabled": true,
+      "cron_expression": "0 9 * * *",
+      "timezone": "Asia/Shanghai"
+    },
+    "quality_control": {
+      "min_word_count": 800,
+      "max_word_count": 3000,
+      "require_images": false,
+      "auto_optimize": true
+    }
+  },
+  "modules": {
+    "outline": {
+      "enabled": true,
+      "default_style": "tech_analysis",
+      "ai_enhancement": true,
+      "styles": ["tech_analysis", "news_commentary", "tutorial_guide"],
+      "quality_threshold": 0.7
+    },
+    "writer": {
+      "enabled": true,
+      "default_style": "professional",
+      "styles": ["professional", "popular_science", "news_commentary"],
+      "ai_assistance": true,
+      "human_review": false,
+      "plagiarism_check": false
+    },
+    "formatter": {
+      "enabled": true,
+      "platform_specific_rules": true,
+      "auto_emoji": true,
+      "auto_hashtag": true,
+      "image_processing": {
+        "enabled": false,
+        "max_width": 1200,
+        "compress_quality": 85
+      }
+    },
+    "publisher": {
+      "enabled": true,
+      "platforms": {
+        "file": {
+          "enabled": true,
+          "output_dir": "./output/published",
+          "save_formats": ["json", "txt", "md"]
+        },
+        "feishu": {
+          "enabled": true,
+          "webhook_url": "https://open.feishu.cn/open-apis/bot/v2/hook/xxx",
+          "message_type": "post",
+          "target_users": ["ou_daf64f0749fab55c7c60295d70f0147a"],
+          "target_groups": ["oc_33296fccb0e39f81a0c68ca9cc0e6208"],
+          "comment": "用于推送内容生产流水线执行结果"
+        },
+        "wechat": {
+          "enabled": true,
+          "mode": "draft",
+          "app_id": "wx07b1ed2cc6fcf622",
+          "app_secret": "e95602578ce3a1cdfc8f8e6564f0f2a7",
+          "thumb_media_id": "6Gdpl3GuPdCla6zbzPNpKmfBchZwzcm3TAMBALY7txaeJO4ppbaeRphjZF-wmTUj",
+          "comment": "未认证公众号发布到草稿箱"
+        },
+        "zhihu": {
+          "enabled": false,
+          "comment": "需要知乎API权限"
+        },
+        "xiaohongshu": {
+          "enabled": false,
+          "comment": "需要小红书创作者平台API"
+        },
+        "toutiao": {
+          "enabled": false,
+          "comment": "需要头条号开放平台API"
+        }
+      },
+      "retry_policy": {
+        "max_retries": 3,
+        "retry_delay": 5,
+        "exponential_backoff": true
+      },
+      "rate_limiting": {
+        "enabled": true,
+        "requests_per_hour": 100
+      }
+    }
+  },
+  "ai_integration": {
+    "enabled": true,
+    "provider": "deepseek",
+    "model": "deepseek-chat",
+    "api_key": "${AI_API_KEY}",
+    "base_url": "https://api.deepseek.com/v1",
+    "temperature": 0.7,
+    "max_tokens": 2000,
+    "comment": "使用DeepSeek官方API；请在运行环境注入AI_API_KEY"
+  },
+  "storage": {
+    "output_base": "./output/pipeline",
+    "keep_history_days": 30,
+    "backup_enabled": true,
+    "backup_dir": "./backup"
+  },
+  "monitoring": {
+    "logging_level": "INFO",
+    "log_file": "./logs/pipeline.log",
+    "performance_tracking": true,
+    "error_reporting": true,
+    "health_check_interval": 3600
+  },
+  "notifications": {
+    "enabled": true,
+    "on_success": true,
+    "on_failure": true,
+    "channels": ["feishu"],
+    "feishu_webhook": "https://open.feishu.cn/open-apis/bot/v2/hook/xxx"
+  }
+}
