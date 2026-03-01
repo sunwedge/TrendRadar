@@ -44,10 +44,9 @@ jobs:
           payload='{
             "title": "Usage Manual",
             "parent_wiki_token": "",
-            "obj_type": "doc"
+            "node_type": "origin"
           }'
 
-          # NOTE: endpoint may vary by app scope/type; keep as explicit workflow template.
           curl -sS -X POST "https://open.feishu.cn/open-apis/wiki/v2/spaces/${SPACE_ID}/nodes" \
             -H "Authorization: Bearer ${FEISHU_ACCESS_TOKEN}" \
             -H "Content-Type: application/json; charset=utf-8" \
