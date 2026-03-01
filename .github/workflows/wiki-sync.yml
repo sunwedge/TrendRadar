@@ -15,17 +15,32 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Get Feishu Access Token
+        env:
+          FEISHU_APP_ID: ${{ secrets.FEISHU_APP_ID }}
+          FEISHU_APP_SECRET: ${{ secrets.FEISHU_APP_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${FEISHU_APP_ID:-}" ] || [ -z "${FEISHU_APP_SECRET:-}" ]; then
+            echo "FEISHU_APP_ID or FEISHU_APP_SECRET is empty"
+            exit 1
+          fi
+          RESPONSE=$(curl -sS -X POST "https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal" \
+            -H "Content-Type: application/json" \
+            -d "{\"app_id\":\"${FEISHU_APP_ID}\",\"app_secret\":\"${FEISHU_APP_SECRET}\"}")
+          FEISHU_ACCESS_TOKEN=$(echo "$RESPONSE" | jq -r '.tenant_access_token')
+          if [ -z "${FEISHU_ACCESS_TOKEN:-}" ] || [ "${FEISHU_ACCESS_TOKEN}" = "null" ]; then
+            echo "Failed to get access token: $RESPONSE"
+            exit 1
+          fi
+          echo "FEISHU_ACCESS_TOKEN=$FEISHU_ACCESS_TOKEN" >> $GITHUB_ENV
+          echo "Successfully obtained access token"
+
       - name: Create wiki page via Feishu API
         env:
-          FEISHU_ACCESS_TOKEN: ${{ secrets.FEISHU_ACCESS_TOKEN }}
           SPACE_ID: "7612135385660967897"
         run: |
           set -euo pipefail
-          if [ -z "${FEISHU_ACCESS_TOKEN:-}" ]; then
-            echo "FEISHU_ACCESS_TOKEN is empty"
-            exit 1
-          fi
-
           payload='{
             "title": "Usage Manual",
             "parent_wiki_token": "",
