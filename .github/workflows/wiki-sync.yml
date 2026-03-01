@@ -15,14 +15,43 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Get tenant access token
+        env:
+          APP_ID: ${{ secrets.APP_ID }}
+          APP_SECRET: ${{ secrets.APP_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${APP_ID:-}" ] || [ -z "${APP_SECRET:-}" ]; then
+            echo "APP_ID or APP_SECRET is empty"
+            exit 1
+          fi
+
+          token_resp="$(curl -sS -X POST "https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal" \
+            -H "Content-Type: application/json; charset=utf-8" \
+            -d "{\"app_id\":\"${APP_ID}\",\"app_secret\":\"${APP_SECRET}\"}")"
+
+          code="$(echo "${token_resp}" | jq -r '.code // empty')"
+          if [ "${code}" != "0" ]; then
+            echo "Failed to get tenant_access_token: ${token_resp}"
+            exit 1
+          fi
+
+          token="$(echo "${token_resp}" | jq -r '.tenant_access_token // empty')"
+          if [ -z "${token}" ] || [ "${token}" = "null" ]; then
+            echo "tenant_access_token missing in response: ${token_resp}"
+            exit 1
+          fi
+
+          echo "FEISHU_APP_ACCESS_TOKEN=${token}" >> "${GITHUB_ENV}"
+
       - name: Create wiki page via Feishu API
         env:
-          FEISHU_ACCESS_TOKEN: ${{ secrets.FEISHU_ACCESS_TOKEN }}
+          FEISHU_APP_ACCESS_TOKEN: ${{ env.FEISHU_APP_ACCESS_TOKEN }}
           SPACE_ID: "7612135385660967897"
         run: |
           set -euo pipefail
-          if [ -z "${FEISHU_ACCESS_TOKEN:-}" ]; then
-            echo "FEISHU_ACCESS_TOKEN is empty"
+          if [ -z "${FEISHU_APP_ACCESS_TOKEN:-}" ]; then
+            echo "FEISHU_APP_ACCESS_TOKEN is empty"
             exit 1
           fi
 
@@ -34,7 +63,7 @@ jobs:
 
           # NOTE: endpoint may vary by app scope/type; keep as explicit workflow template.
           curl -sS -X POST "https://open.feishu.cn/open-apis/wiki/v2/spaces/${SPACE_ID}/nodes" \
-            -H "Authorization: Bearer ${FEISHU_ACCESS_TOKEN}" \
+            -H "Authorization: Bearer ${FEISHU_APP_ACCESS_TOKEN}" \
             -H "Content-Type: application/json; charset=utf-8" \
             -d "${payload}" | tee feishu_wiki_response.json
 
