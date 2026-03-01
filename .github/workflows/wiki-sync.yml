@@ -44,7 +44,8 @@ jobs:
           payload='{
             "title": "Usage Manual",
             "parent_wiki_token": "",
-            "node_type": "origin"
+            "node_type": "origin",
+            "obj_type": "doc"
           }'
 
           curl -sS -X POST "https://open.feishu.cn/open-apis/wiki/v2/spaces/${SPACE_ID}/nodes" \
